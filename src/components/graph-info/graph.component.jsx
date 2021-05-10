@@ -1,5 +1,4 @@
 import React,{useEffect, useState}  from 'react'
-import TextField from "@material-ui/core/TextField";
 
 import graphStyle from './graph.style.css'
 
@@ -9,37 +8,38 @@ import LoadingSpinner from '../loading-spinner/loading-spinner.component'
 import moment from "moment";
 
 import { makeStyles } from "@material-ui/core/styles";
-import FilledInput from "@material-ui/core/FilledInput";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import OutlinedInput from "@material-ui/core/OutlinedInput";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-    },
-  },
-}));
 
 
 
 const GraphInfo = () => {
     
-const [forecast, setForecast]= useState(null);    
-const [actual, setActual]= useState(null); 
+// const [forecast, setForecast]= useState(null);    
+// const [actual, setActual]= useState(null); 
 const [loading, setLoading]= useState(true)
-const [start, setStart] = useState('');
-const [end, setEnd]= useState('');
 
+const [startError, setStartError] = useState(false);
+const [endError, setEndError]= useState(false)
 
- const classes = useStyles();
+const [start, setStart] = useState(
+  moment().subtract(7, "days").format("YYYY-MM-DD")
+);
+const [end, setEnd] = useState(moment().format("YYYY-MM-DD"));
+const [data, setData]= useState({})
+
+ 
 
 
     
+ useEffect(()=>{
+   getIntensity()
+console.log('j')
+ },[])
+
+ 
+
   async function getIntensity(){
+    console.log('hh')
     fetch(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
   .then(function (res) {
       
@@ -48,19 +48,20 @@ const [end, setEnd]= useState('');
   .then(function (body) {
   setLoading(false);
    
-   
-     setForecast(body.data[0].intensity.forecast);
-     setActual(body.data[0].intensity.actual);
-  }); 
- 
-  
-} 
+   console.log(body)
 
-const date1 = moment(start).format('LLLL');
+const date1 = moment(start).format("LLLL");
 const date2 = moment(end).format("LLLL");
 
-const data = {
-  labels: [date1 +' to ' + date2],
+const forecast =(body.data[0].intensity.forecast);
+const actual= (body.data[0].intensity.actual);
+setEnd("")
+setStart("")
+
+console.log(forecast, actual)
+const graphData = {
+  labels: [date1 + " to " + date2],
+  parsing: false,
   datasets: [
     {
       label: "Forecast",
@@ -69,6 +70,7 @@ const data = {
       borderColor: ["rgba(44, 130, 201, 1)"],
       borderWidth: 5,
     },
+    
     {
       label: "Actual",
       data: [actual],
@@ -78,10 +80,20 @@ const data = {
       borderWidth: 5,
     },
     
-    
   ],
-  
 };
+
+   console.log(start, end, graphData)
+
+     
+
+     setData(graphData)
+     
+  }); 
+ 
+  
+} 
+
 
 
 
@@ -94,30 +106,29 @@ const submitVals = (e) => {
     const validateEnd = new RegExp(/^\d{4}-\d{2}-\d{2}$/).test(end);
 
     if (!validateStart){
-        return alert('h')
+      setStartError(true)
+      setStart("Please input date in YYYY-MM-DD format");
+      return
+        
+        
     }
 
     if (!validateEnd){
-        return alert('j')
+        setEndError(true);
+        setEnd("Please input date in YYYY-MM-DD format");
+        return
     }
     console.log(validateStart + validateEnd)
-      const timeFrame = {
-        start: validateStart,
-        end: validateEnd,
-      };
-
+      
+    
+    getIntensity()
+   
      
 
 
- setTimeout(function () {
-
-   getIntensity(); 
-   
-   
- },);
 
 }
-
+console.log(data)
     return (
       <div className="container">
         <div className="title">
@@ -136,29 +147,14 @@ const submitVals = (e) => {
               2017-09-26.
             </p>
 
-            {/* <form className={classes.root} noValidate autoComplete="off">
-              <FormControl>
-                <InputLabel htmlFor="component-simple">Start</InputLabel>
-                <Input
-                  id="component-simple"
-                  value={start}
-                  onChange={(e) =>setStart(e.target.value)}
-                />
-              </FormControl>
-              <FormControl>
-                <InputLabel htmlFor="component-helper">End</InputLabel>
-                <Input
-                  id="component-helper"
-                  value={end}
-                  onChange={(e)=>setEnd(e.target.value)}
-                  aria-describedby="component-helper-text"
-                /> */}
 
              <form>
               <label>
                 Start
                 <input
                   required
+                  value={start}
+                  className={ startError ? "error": "" }
                   name="start"
                   type="text"
                   onChange={(e) => setStart(e.target.value)}
@@ -169,16 +165,17 @@ const submitVals = (e) => {
                 End
                 <input
                  required
+                 value={end}
                   name="end"
                   type="text"
+                  className={ endError ? "error": "" }
                   onChange={(e) => setEnd(e.target.value)}
                   
                 />
               </label>
             </form> 
                 <button onClick={submitVals}>Submit</button>
-              {/* </FormControl>
-            </form> */}
+           
           </div>
         </div>
       </div>
