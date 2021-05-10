@@ -1,25 +1,12 @@
-import logo from './logo.svg';
-import './App.css';
+import GraphInfo from './components/graph-info/graph.component'
 
-function App() {
+function Graph() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    
+    <GraphInfo />
+      
+  
   );
 }
 
-export default App;
+export default Graph;
