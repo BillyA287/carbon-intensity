@@ -1,5 +1,6 @@
 import React,{useEffect, useState}  from 'react'
-
+import {Formik} from "formik";
+import * as Yup from "yup";
 import graphStyle from './graph.style.css'
 
 
@@ -7,127 +8,95 @@ import {Bar} from 'react-chartjs-2'
 import LoadingSpinner from '../loading-spinner/loading-spinner.component'
 import moment from "moment";
 
-import { makeStyles } from "@material-ui/core/styles";
-
 
 
 
 const GraphInfo = () => {
-    
-// const [forecast, setForecast]= useState(null);    
-// const [actual, setActual]= useState(null); 
-const [loading, setLoading]= useState(true)
 
-const [startError, setStartError] = useState(false);
-const [endError, setEndError]= useState(false)
+    
+
+const [loading, setLoading]= useState(true)
 
 const [start, setStart] = useState(
   moment().subtract(7, "days").format("YYYY-MM-DD")
 );
 const [end, setEnd] = useState(moment().format("YYYY-MM-DD"));
 const [data, setData]= useState({})
+const [options, setOptions]= useState({})
 
- 
 
 
     
  useEffect(()=>{
-   getIntensity()
-console.log('j')
- },[])
 
- 
-
-  async function getIntensity(){
-    console.log('hh')
+  console.log("start" , start)
+  console.log("end", end)
+  async function getIntensity() {
     fetch(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
-  .then(function (res) {
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (body) {
+        setLoading(false);
+
+        const date1 = moment(start).format("LLLL");
+        const date2 = moment(end).format("LLLL");
+
+        const forecast = body.data[0].intensity.forecast;
+        const actual = body.data[0].intensity.actual;
       
-    return res.json();
-  })
-  .then(function (body) {
-  setLoading(false);
-   
-   console.log(body)
 
-const date1 = moment(start).format("LLLL");
-const date2 = moment(end).format("LLLL");
+        const options = {
+          
 
-const forecast =(body.data[0].intensity.forecast);
-const actual= (body.data[0].intensity.actual);
-setEnd("")
-setStart("")
+    }
 
-console.log(forecast, actual)
-const graphData = {
-  labels: [date1 + " to " + date2],
-  parsing: false,
-  datasets: [
-    {
-      label: "Forecast",
-      data: [forecast, actual],
-      backgroundColor: ["rgba(44, 130, 201, 1)"],
-      borderColor: ["rgba(44, 130, 201, 1)"],
-      borderWidth: 5,
-    },
-    
-    {
-      label: "Actual",
-      data: [actual],
+        const graphData = {
+          labels: [date1 + " to " + date2],
+          parsing: false,
+          datasets: [
+            {
+              label: "Forecast",
+              data: [forecast, actual],
+              backgroundColor: ["rgba(44, 130, 201, 1)"],
+              borderColor: ["rgba(44, 130, 201, 1)"],
+              borderWidth: 5,
+            },
 
-      backgroundColor: ["rgba(42, 187, 155, 1)"],
-      borderColor: ["rgba(42, 187, 155, 1)"],
-      borderWidth: 5,
-    },
-    
-  ],
-};
+            {
+              label: "Actual",
+              data: [actual],
 
-   console.log(start, end, graphData)
+              backgroundColor: ["rgba(42, 187, 155, 1)"],
+              borderColor: ["rgba(42, 187, 155, 1)"],
+              borderWidth: 5,
+            },
+            
+          ],
+          
+        };
 
-     
+        setData(graphData);
+        setOptions(options)
+      });
+  } 
+   getIntensity()
 
-     setData(graphData)
-     
-  }); 
- 
   
-} 
-
-
-
-
-
-
-const submitVals = (e) => {
-    e.preventDefault();
-
-    const validateStart = new RegExp(/^\d{4}-\d{2}-\d{2}$/).test(start);
-    const validateEnd = new RegExp(/^\d{4}-\d{2}-\d{2}$/).test(end);
-
-    if (!validateStart){
-      setStartError(true)
-      setStart("Please input date in YYYY-MM-DD format");
-      return
-        
-        
-    }
-
-    if (!validateEnd){
-        setEndError(true);
-        setEnd("Please input date in YYYY-MM-DD format");
-        return
-    }
-    console.log(validateStart + validateEnd)
-      
     
-    getIntensity()
-   
-     
+ },[end , start])
 
 
 
-}
+const validationSchema = Yup.object().shape({
+  start: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/).required(),
+  end: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/).required(),
+});
+
+
+
+
+
 console.log(data)
     return (
       <div className="container">
@@ -136,7 +105,7 @@ console.log(data)
         </div>
 
         <div className="chart">
-          {loading ? <LoadingSpinner /> : <Bar data={data} />}
+          {loading ? <LoadingSpinner /> : <Bar  data={data} options={options} />}
 
           <div className="user-input-section">
             <p>
@@ -146,36 +115,71 @@ console.log(data)
               cannot be shown between years. Data is only available after
               2017-09-26.
             </p>
+            
+            <Formik
+              validationSchema={validationSchema}
+              initialValues={{
+                end,
+                start,
+              }}
+              onSubmit={(values) => console.log(values)}
+            >
+              {({
+                values,
+                touched,
+                handleSubmit,
+               
+                errors,
+                handleBlur,
+                handleChange,
+              }) => (
+                <form onSubmit={handleSubmit}>
+                  <label>
+                  <h2>
+                    Start
+                  </h2>
+                    
+                    <input
+                      required
+                      value={values.start}
+                      name="start"
+                      type="date"
+                      onChange={(e) => {
+                        handleChange(e);
+                        setStart(e.target.value);
+                      }}
+                      onBlur={handleBlur}
+                    />
+                    {touched.start && errors.start && (
+                      <div className="error">{errors.start}</div>
+                    )}
+                  </label>
 
+                  <label>
+                  <h2>
+                    End
+                  </h2>
+                    
+                    <input
+                      required
+                      value={values.end}
+                      name="end"
+                      type="date"
+                      onChange={(e) => {
+                        handleChange(e);
+                        setEnd(e.target.value);
+                      }}
+                      onBlur={handleBlur}
+                    />
+                    {touched.end && errors.end && (
+                      <div className="error">{errors.end}</div>
+                    )}
+                  </label>
 
-             <form>
-              <label>
-                Start
-                <input
-                  required
-                  value={start}
-                  className={ startError ? "error": "" }
-                  name="start"
-                  type="text"
-                  onChange={(e) => setStart(e.target.value)}
                   
-                />
-              </label>
-              <label>
-                End
-                <input
-                 required
-                 value={end}
-                  name="end"
-                  type="text"
-                  className={ endError ? "error": "" }
-                  onChange={(e) => setEnd(e.target.value)}
-                  
-                />
-              </label>
-            </form> 
-                <button onClick={submitVals}>Submit</button>
-           
+                </form>
+              )}
+            </Formik>
           </div>
         </div>
       </div>
