@@ -22,69 +22,62 @@ const [start, setStart] = useState(
 );
 const [end, setEnd] = useState(moment().format("YYYY-MM-DD"));
 const [data, setData]= useState({})
-const [options, setOptions]= useState({})
 
 
 
     
- useEffect(()=>{
+ useEffect(() => {
 
-  console.log("start" , start)
-  console.log("end", end)
-  async function getIntensity() {
-    fetch(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (body) {
-        setLoading(false);
+   async function getIntensity() {
+       const date1 = moment(start).format("LLLL");
+         const date2 = moment(end).format("LLLL");
+     try{
+        fetch(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
+       .then(function (res) {
+         return res.json();
+       })
+       .then(function (body) {
+         setLoading(false);
 
-        const date1 = moment(start).format("LLLL");
-        const date2 = moment(end).format("LLLL");
+       
 
-        const forecast = body.data[0].intensity.forecast;
-        const actual = body.data[0].intensity.actual;
-      
+         const forecast = body.data[0].intensity.forecast;
+         const actual = body.data[0].intensity.actual;
 
-        const options = {
-          
+         const graphData = {
+           labels: [date1 + " to " + date2],
+           parsing: false,
+           datasets: [
+             {
+               label: "Forecast",
+               data: [forecast, actual],
+               backgroundColor: ["rgba(44, 130, 201, 1)"],
+               borderColor: ["rgba(44, 130, 201, 1)"],
+               borderWidth: 5,
+             },
 
-    }
+             {
+               label: "Actual",
+               data: [actual],
 
-        const graphData = {
-          labels: [date1 + " to " + date2],
-          parsing: false,
-          datasets: [
-            {
-              label: "Forecast",
-              data: [forecast, actual],
-              backgroundColor: ["rgba(44, 130, 201, 1)"],
-              borderColor: ["rgba(44, 130, 201, 1)"],
-              borderWidth: 5,
-            },
+               backgroundColor: ["rgba(42, 187, 155, 1)"],
+               borderColor: ["rgba(42, 187, 155, 1)"],
+               borderWidth: 5,
+             },
+           ],
+           
+         };
 
-            {
-              label: "Actual",
-              data: [actual],
+         setData(graphData);
+       }); 
+     } catch (err){
+      alert(err)
+     }
+   
+   }
 
-              backgroundColor: ["rgba(42, 187, 155, 1)"],
-              borderColor: ["rgba(42, 187, 155, 1)"],
-              borderWidth: 5,
-            },
-            
-          ],
-          
-        };
-
-        setData(graphData);
-        setOptions(options)
-      });
-  } 
-   getIntensity()
-
-  
-    
- },[end , start])
+   getIntensity();
+ }, [end, start]);
 
 
 
@@ -97,7 +90,7 @@ const validationSchema = Yup.object().shape({
 
 
 
-console.log(data)
+console.log('')
     return (
       <div className="container">
         <div className="title">
@@ -105,7 +98,7 @@ console.log(data)
         </div>
 
         <div className="chart">
-          {loading ? <LoadingSpinner /> : <Bar  data={data} options={options} />}
+          {loading ? <LoadingSpinner /> : <Bar  data={data} className="bar-graph" />}
 
           <div className="user-input-section">
             <p>
