@@ -9,7 +9,8 @@
    z-index: 9999;
 }
 .error{
-  border: 1px solid red;
+  
+  color: red;
  
 }
 

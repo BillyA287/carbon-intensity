@@ -1,6 +1,7 @@
 import React,{useEffect, useState}  from 'react'
-import {Formik} from "formik";
+import {ErrorMessage, Formik} from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 import graphStyle from './graph.style.css'
 
 
@@ -15,7 +16,8 @@ const GraphInfo = () => {
 
     
 
-const [loading, setLoading]= useState(true)
+const [loading, setLoading]= useState(true);
+const [errorMessage, setErrorMessage] = useState("")
 
 const [start, setStart] = useState(
   moment().subtract(7, "days").format("YYYY-MM-DD")
@@ -33,15 +35,11 @@ const [data, setData]= useState({})
        const date1 = moment(start).format("LLLL");
          const date2 = moment(end).format("LLLL");
      try{
-        fetch(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
-       .then(function (res) {
-         return res.json();
-       })
-       .then(function (body) {
+       let res = await axios.get(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
+    
+        
+         const body = res.data;
          setLoading(false);
-
-       
-
          const forecast = body.data[0].intensity.forecast;
          const actual = body.data[0].intensity.actual;
 
@@ -66,37 +64,19 @@ const [data, setData]= useState({})
                borderWidth: 5,
              },
            ],
-    //        options: {
-    // responsive: true,
-    // scales: {
-    //   x: {
-    //     display: true,
-    //     title: {
-    //       display: true,
-    //       text: 'Carbon Intensity',
-         
-    //     }
-    //   },
-    //   y: {
-    //     display: true,
-    //     title: {
-    //       display: true,
-    //       text: 'Value',
-    //    text: 'Value',
-          
-          
-    //     }
-    //   }
-    // }
-  // },
+   
 
            
          };
 
          setData(graphData);
-       }); 
+     
      } catch (err){
-      alert(err)
+    
+      setLoading(false)
+      setErrorMessage(err.response.data.error.message);
+        
+
      }
    
    }
@@ -118,6 +98,7 @@ const validationSchema = Yup.object().shape({
 console.log('')
     return (
       <div className="container">
+      
         <div className="title">
           <h1 className="text">National Grid</h1>
           <p className="text">
@@ -134,6 +115,8 @@ console.log('')
             conventional generation.
           </p>
         </div>
+
+  {errorMessage.length > 0 && <div className="error">{errorMessage}</div>}
 
         <div className="chart" >
           {loading ? <LoadingSpinner /> : <Bar data={data} />}
