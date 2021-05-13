@@ -25,6 +25,7 @@ const [data, setData]= useState({})
 
 
 
+
     
  useEffect(() => {
 
@@ -47,10 +48,11 @@ const [data, setData]= useState({})
          const graphData = {
            labels: [date1 + " to " + date2],
            parsing: false,
+           responsive: true,
            datasets: [
              {
                label: "Forecast",
-               data: [forecast, actual],
+               data: [forecast],
                backgroundColor: ["rgba(44, 130, 201, 1)"],
                borderColor: ["rgba(44, 130, 201, 1)"],
                borderWidth: 5,
@@ -59,12 +61,35 @@ const [data, setData]= useState({})
              {
                label: "Actual",
                data: [actual],
-
                backgroundColor: ["rgba(42, 187, 155, 1)"],
                borderColor: ["rgba(42, 187, 155, 1)"],
                borderWidth: 5,
              },
            ],
+    //        options: {
+    // responsive: true,
+    // scales: {
+    //   x: {
+    //     display: true,
+    //     title: {
+    //       display: true,
+    //       text: 'Carbon Intensity',
+         
+    //     }
+    //   },
+    //   y: {
+    //     display: true,
+    //     title: {
+    //       display: true,
+    //       text: 'Value',
+    //    text: 'Value',
+          
+          
+    //     }
+    //   }
+    // }
+  // },
+
            
          };
 
@@ -94,21 +119,34 @@ console.log('')
     return (
       <div className="container">
         <div className="title">
-          <h1>National Grid</h1>
+          <h1 className="text">National Grid</h1>
+          <p className="text">
+            The carbon intensity of electricity is a measure of how much CO2
+            emissions are produced per kilowatt hour of electricity consumed.
+          </p>
+          <p className="text">
+            The 'actual' value (green line) is the estimated carbon intensity
+            from metered generation. The 'forecast' value (blue line) is our
+            forecast. The carbon intensity of electricity is sensitive to small
+            changes in carbon-intensive generation. Carbon intensity varies by
+            hour, day, and season due to changes in electricity demand, low
+            carbon generation (wind, solar, hydro, nuclear, biomass) and
+            conventional generation.
+          </p>
         </div>
 
-        <div className="chart">
-          {loading ? <LoadingSpinner /> : <Bar  data={data} className="bar-graph" />}
+        <div className="chart" >
+          {loading ? <LoadingSpinner /> : <Bar data={data} />}
 
           <div className="user-input-section">
-            <p>
+            <p className="text">
               Select a start date and end date in the boxes below in the format
               YYYY-MM-DD. Data is retrieved in UTC time and is displayed in the
               graph above. Only 14 days of data can be processed at a time. Data
               cannot be shown between years. Data is only available after
               2017-09-26.
             </p>
-            
+
             <Formik
               validationSchema={validationSchema}
               initialValues={{
@@ -121,17 +159,15 @@ console.log('')
                 values,
                 touched,
                 handleSubmit,
-               
+
                 errors,
                 handleBlur,
                 handleChange,
               }) => (
                 <form onSubmit={handleSubmit}>
                   <label>
-                  <h2>
-                    Start
-                  </h2>
-                    
+                    <h2 className="text">Start</h2>
+
                     <input
                       required
                       value={values.start}
@@ -149,10 +185,8 @@ console.log('')
                   </label>
 
                   <label>
-                  <h2>
-                    End
-                  </h2>
-                    
+                    <h2 className="text">End</h2>
+
                     <input
                       required
                       value={values.end}
@@ -168,8 +202,6 @@ console.log('')
                       <div className="error">{errors.end}</div>
                     )}
                   </label>
-
-                  
                 </form>
               )}
             </Formik>

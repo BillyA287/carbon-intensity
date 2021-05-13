@@ -28,3 +28,6 @@ input{
     height: 54px;
     background: rgb(217 217 217);
 }
+.text{
+  font-family: 'Open Sans', sans-serif;
+}
