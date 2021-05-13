@@ -1,5 +1,5 @@
 import React,{useEffect, useState}  from 'react'
-import {ErrorMessage, Formik} from "formik";
+import {Formik} from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import graphStyle from './graph.style.css'
@@ -28,25 +28,32 @@ const [data, setData]= useState({})
 
 
 
-    
+  //Api call wrapped in use effect to only render when the value changes   
  useEffect(() => {
+
+  
 
    async function getIntensity() {
        const date1 = moment(start).format("LLLL");
          const date2 = moment(end).format("LLLL");
+
+         // try catch block to handle any potenital errors which may happen
      try{
        let res = await axios.get(`https://api.carbonintensity.org.uk/intensity/${start}/${end}`)
     
         
          const body = res.data;
          setLoading(false);
+         
          const forecast = body.data[0].intensity.forecast;
          const actual = body.data[0].intensity.actual;
 
+        
          const graphData = {
            labels: [date1 + " to " + date2],
            parsing: false,
            responsive: true,
+           
            datasets: [
              {
                label: "Forecast",
@@ -63,6 +70,7 @@ const [data, setData]= useState({})
                borderColor: ["rgba(42, 187, 155, 1)"],
                borderWidth: 5,
              },
+             
            ],
    
 
@@ -85,7 +93,7 @@ const [data, setData]= useState({})
  }, [end, start]);
 
 
-
+// validation to check that both input values match the regex
 const validationSchema = Yup.object().shape({
   start: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/).required(),
   end: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/).required(),
@@ -95,7 +103,7 @@ const validationSchema = Yup.object().shape({
 
 
 
-console.log('')
+
     return (
       <div className="container">
       
@@ -129,7 +137,6 @@ console.log('')
               cannot be shown between years. Data is only available after
               2017-09-26.
             </p>
-
             <Formik
               validationSchema={validationSchema}
               initialValues={{

@@ -15,7 +15,7 @@
 }
 
 .container{
-  padding: 100px;
+  padding: 140px;
 }
 form{
   display: flex;
@@ -31,4 +31,17 @@ input{
 }
 .text{
   font-family: 'Open Sans', sans-serif;
+}
+
+@media only screen and (max-width: 600px) {
+ .container {
+   padding:10px;
+ }
+ .text {
+   font-size: 10px;
+   width: 100%;
+ }
+ .chart{
+   height: 30px;
+ }
 }
