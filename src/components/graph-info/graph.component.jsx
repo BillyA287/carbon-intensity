@@ -71,6 +71,7 @@ const [data, setData]= useState({})
                borderWidth: 5,
              },
              
+             
            ],
    
 
@@ -78,7 +79,7 @@ const [data, setData]= useState({})
          };
 
          setData(graphData);
-     
+     // if there is an error conditionally render the message to the user in error div 
      } catch (err){
     
       setLoading(false)
